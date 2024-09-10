@@ -9,15 +9,21 @@ Rails.application.routes.draw do
   get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
   get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
 
+  # Products RESTful APIs
   get "/products" => "products#index"
-  get "/products/:id" => "products#show"
-
   post "/products" => "products#create"
-
+  get "/products/:id" => "products#show"
   put "/products/:id" => "products#update"
   patch "/products/:id" => "products#update"
-
   delete "/products/:id" => "products#destroy"
+
+  # Supplier Restful APIs
+  get "/suppliers" => "suppliers#index"
+  post "/suppliers" => "suppliers#create"
+  get "/suppliers/:id" => "suppliers#show"
+  put "/suppliers/:id" => "suppliers#update"
+  patch "/suppliers/:id" => "suppliers#update"
+  delete "/suppliers/:id" => "suppliers#destroy"
 
   # Defines the root path route ("/")
   # root "posts#index"
