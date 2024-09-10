@@ -55,3 +55,6 @@ group :test do
   gem "capybara"
   gem "selenium-webdriver"
 end
+
+# allow web requests from [http://mini-capstone.peterxjang.com/] - [https://github.com/cyu/rack-cors]
+gem "rack-cors"
