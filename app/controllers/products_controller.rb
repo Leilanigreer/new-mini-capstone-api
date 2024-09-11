@@ -13,8 +13,8 @@ class ProductsController < ApplicationController
     @product = Product.new(
       name: params[:name],
       price: params[:price],
-      image_url: params[:image_url],
-      description: params[:description]
+      description: params[:description],
+      supplier_id: params[:supplier_id]
     )
 
     # happy/sad test
@@ -31,8 +31,8 @@ class ProductsController < ApplicationController
     if @product.update(
       name: params[:name] || @product.name,
       price: params[:price] || @product.price,
-      image_url: params[:image_url] || @product.image_url,
       description: params[:description] || @product.description,
+      supplier_id: params[:supplier_id] || @product.supplier_id,
     )
     render :show
     else
