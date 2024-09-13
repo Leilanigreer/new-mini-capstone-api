@@ -5,19 +5,21 @@ class OrdersController < ApplicationController
   end
 
   def create
-    pp "This IS THE CURRENT USER"
-    pp current_user
-    pp "THAT WAS THE CURRENT"
     if current_user != nil
       @order = Order.new(
         user_id: current_user.id,
         product_id: params[:product_id],
         quantity: params[:quantity],
-        subtotal: params[:subtotal],
-        tax: params[:tax],
-        total: params[:total],
+        subtotal: nil,
+        tax: nil,
+        total: nil,
       )
       if @order.save
+        @order.update(
+          subtotal: @order.sub_total,
+          tax: @order.order_tax,
+          total: @order.order_total
+        )
         render :show
       else
         render json: { errors: @order.errors.full_messages }, status: :unprocessable_entity
