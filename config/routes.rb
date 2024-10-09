@@ -33,8 +33,11 @@ Rails.application.routes.draw do
   # post "/orders" => "orders#create"
   # get "/orders/:id" => "orders#show"
 
-  get "categories" => "categories#index"
-  get "categories/:id" => "categories#show"
+  get "/categories" => "categories#index"
+  get "/categories/:id" => "categories#show"
+
+  get "/carted-products" => "carted_products#index"
+  post "/carted-products" => "carted_products#create"
 
   # Defines the root path route ("/")
   # root "posts#index"

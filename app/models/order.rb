@@ -1,6 +1,7 @@
 class Order < ApplicationRecord
-  belongs_to :product
+  belongs_to :carted_product
   belongs_to :user
+  has_many :products, through: :carted_product
 
   def product_price
     product.price
