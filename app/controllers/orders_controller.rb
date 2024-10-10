@@ -5,27 +5,23 @@ class OrdersController < ApplicationController
   end
 
   def create
-    if current_user != nil
-      @order = Order.new(
-        user_id: current_user.id,
-        product_id: params[:product_id],
-        quantity: params[:quantity],
-        subtotal: nil,
-        tax: nil,
-        total: nil,
-      )
-      if @order.save
-        @order.update(
-          subtotal: @order.sub_total,
-          tax: @order.order_tax,
-          total: @order.order_total
-        )
-        render :show
+    if current_user
+      carted_products = CartedProduct.carted_items_for_user(current_user.id)
+
+      if carted_products.any?
+        @order = current_user.orders.new
+
+        if @order.save
+          carted_products.update_all(status: "purchased", order_id: @order.id, purchased_price:)
+          render :show
+        else
+          render json: { errors: @order.errors.full_messages }, status: :unprocessable_entity
+        end
       else
-        render json: { errors: @order.errors.full_messages }, status: :unprocessable_entity
+        render json: { errors: [ "No items in cart" ] }, status: :unprocessable_entity
       end
     else
-      render json: { errors: "You must be logged in to place an order" }
+      render json: { errors: [ "You must be logged in to place an order" ] }, status: :unauthorized
     end
   end
 

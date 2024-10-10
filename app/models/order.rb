@@ -1,21 +1,14 @@
 class Order < ApplicationRecord
-  belongs_to :carted_product
   belongs_to :user
-  has_many :products, through: :carted_product
+  has_many :carted_products
+  has_many :products, through: :carted_products
 
-  def product_price
-    product.price
-  end
+  before_create :set_totals
 
-  def sub_total
-    product_price * quantity.to_d
-  end
-
-  def order_tax
-    sub_total * 0.09
-  end
-
-  def order_total
-    sub_total + order_tax
+  def set_totals
+    carted_products = CartedProduct.carted_items_for_user(user_id)
+    self.subtotal = carted_products.sum(&:total_carted_price)
+    self.tax = subtotal * 0.09
+    self.total = subtotal + tax
   end
 end
