@@ -6,3 +6,9 @@ json.total order.total
 # json.payment_method order.payment_method
 json.ordered_date order.ordered_date
 json.updated_date order.updated_date
+json.carted_products order.carted_products.each do |cp|
+  json.id cp.id
+  json.product_quantity cp.product_quantity
+  json.purchased_price cp.purchased_price
+  json.product cp.product
+end
