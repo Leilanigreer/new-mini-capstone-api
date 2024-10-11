@@ -2,17 +2,8 @@ class CartedProductsController < ApplicationController
   def index
     if current_user != nil
       @carted_products = CartedProduct.carted_items_for_user(current_user)
-      grand_total = CartedProduct.grand_total_for_user_carted(current_user.id)
-
-      render json: {
-        carted_products: @carted_products.map { |cp|
-        cp.as_json.merge(
-          product_price: cp.product_price,
-          total_carted_price: cp.total_carted_price
-          )
-        },
-        grand_total: grand_total
-      }
+      @grand_total = CartedProduct.grand_total_for_user_carted(current_user.id)
+      render :index
     else
       # @carted_products = CartedProduct.all
       render json: { errors: "You must be logged in to see the items in your cart" }

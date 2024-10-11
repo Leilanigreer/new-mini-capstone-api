@@ -12,7 +12,9 @@ class OrdersController < ApplicationController
         @order = current_user.orders.new
 
         if @order.save
-          carted_products.update_all(status: "purchased", order_id: @order.id, purchased_price:)
+          carted_products.each do |cp|
+          cp.update(status: "purchased", order_id: @order.id, purchased_price: cp.product.price)
+          end
           render :show
         else
           render json: { errors: @order.errors.full_messages }, status: :unprocessable_entity
