@@ -10,5 +10,6 @@ json.carted_products order.carted_products.each do |cp|
   json.id cp.id
   json.product_quantity cp.product_quantity
   json.purchased_price cp.purchased_price
+  json.total_carted_price cp.product.price * cp.product_quantity
   json.product cp.product
 end
