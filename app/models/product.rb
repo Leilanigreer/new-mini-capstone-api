@@ -31,4 +31,14 @@ class Product < ApplicationRecord
   def total
     price + tax
   end
+
+  def images_with_default
+    if images.length > 0
+      images
+    else
+      [
+        { id: 100000, url: "https://mscclaw.com/media/Image-Coming-Soon.png", created_at: Time.now, updated_at: Time.now }
+      ]
+    end
+  end
 end

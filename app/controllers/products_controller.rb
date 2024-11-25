@@ -19,6 +19,13 @@ class ProductsController < ApplicationController
 
     # happy/sad test
     if @product.save
+      params[:image_urls].each do |url|
+        image = Image.new(
+          url: url,
+          product_id: @product.id
+        )
+        image.save
+      end
       render :show
     else
       render json: { errors: @product.errors.full_messages }, status: :unprocessable_entity
