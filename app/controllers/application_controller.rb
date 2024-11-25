@@ -1,6 +1,4 @@
 class ApplicationController < ActionController::Base
-  # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
-  # allow_browser versions: :modern
   protect_from_forgery with: :exception, unless: -> { request.format.json? }
 
   def current_user
@@ -23,7 +21,38 @@ class ApplicationController < ActionController::Base
 
   def authenticate_user
     unless current_user
-      render json: {}, status: :unauthorized
+      render json: { error: "Unauthorized" }, status: :unauthorized
     end
+  end
+
+  def authenticate_admin
+    unless current_user&.admin?
+      render json: { error: "Admin access required" }, status: :forbidden
+    end
+  end
+
+  # Helper method to check specific roles
+  def require_role(*roles)
+    unless current_user && roles.any? { |role| current_user.send("#{role}?") }
+      render json: {
+        error: "Access denied",
+        required_roles: roles
+      }, status: :forbidden
+    end
+  end
+
+  # Helper to check for specific permissions
+  def check_resource_owner(resource)
+    unless current_user && (current_user.admin? || resource.user_id == current_user.id)
+      render json: { error: "Not authorized to access this resource" }, status: :forbidden
+    end
+  end
+
+  private
+
+  def user_not_authorized
+    render json: {
+      error: "You are not authorized to perform this action"
+    }, status: :forbidden
   end
 end

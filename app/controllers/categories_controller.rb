@@ -1,4 +1,6 @@
 class CategoriesController < ApplicationController
+  before_action :authorize_admin!, only: [ :new, :create, :edit, :update, :destroy ]
+
   def index
     @category = Category.all
     render :index
