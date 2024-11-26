@@ -1,57 +1,64 @@
 class ProductsController < ApplicationController
-  before_action :authorize_admin!, only: [ :new, :create, :edit, :update, :destroy ]
+  before_action :authenticate_user, only: [ :create, :update, :destroy ]
+  before_action :authorize_admin!, only: [ :create, :update, :destroy ]
+  before_action :set_product, only: [ :show, :update, :destroy ]
 
+  # Public actions - no auth required
   def index
     @products = Product.all
     render :index
   end
 
   def show
-    @product = Product.find_by(id: params[:id])
     render :show
   end
 
+  # Admin-only actions below
   def create
-    @product = Product.new(
-      name: params[:name],
-      price: params[:price],
-      description: params[:description],
-      supplier_id: params[:supplier_id]
-    )
+    @product = Product.new(product_params)
 
-    # happy/sad test
     if @product.save
-      params[:image_urls].each do |url|
-        image = Image.new(
-          url: url,
-          product_id: @product.id
-        )
-        image.save
-      end
+      create_product_images if params[:image_urls].present?
       render :show
     else
       render json: { errors: @product.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
-  # ifs are part of the happy/sad test
   def update
-    @product = Product.find_by(id: params[:id])
-    if @product.update(
-      name: params[:name] || @product.name,
-      price: params[:price] || @product.price,
-      description: params[:description] || @product.description,
-      supplier_id: params[:supplier_id] || @product.supplier_id,
-    )
-    render :show
+    if @product.update(product_params)
+      render :show
     else
       render json: { errors: @product.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
   def destroy
-    @product = Product.find_by(id: params[:id])
     @product.destroy
-    render json: { message: "product has been removed" }
+    render json: { message: "Product has been removed" }
+  end
+
+  private
+
+  def set_product
+    @product = Product.find_by(id: params[:id])
+    unless @product
+      render json: { error: "Product not found" }, status: :not_found
+    end
+  end
+
+  def product_params
+    {
+      name: params[:name] || @product&.name,
+      price: params[:price] || @product&.price,
+      description: params[:description] || @product&.description,
+      supplier_id: params[:supplier_id] || @product&.supplier_id
+    }
+  end
+
+  def create_product_images
+    params[:image_urls].each do |url|
+      @product.images.create(url: url)
+    end
   end
 end
