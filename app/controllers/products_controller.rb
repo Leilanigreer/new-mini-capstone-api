@@ -27,6 +27,11 @@ class ProductsController < ApplicationController
 
   def update
     if @product.update(product_params)
+      if params[:image_urls].present?
+        # Option 1: Replace all existing images
+        @product.images.destroy_all
+        create_product_images
+      end
       render :show
     else
       render json: { errors: @product.errors.full_messages }, status: :unprocessable_entity
@@ -57,8 +62,14 @@ class ProductsController < ApplicationController
   end
 
   def create_product_images
+    image_errors = []
     params[:image_urls].each do |url|
-      @product.images.create(url: url)
+      image = @product.images.create(url: url)
+      image_errors << image.errors.full_messages if image.errors.any?
+    end
+
+    if image_errors.any?
+      render json: { image_errors: image_errors.flatten }, status: :unprocessable_entity
     end
   end
 end

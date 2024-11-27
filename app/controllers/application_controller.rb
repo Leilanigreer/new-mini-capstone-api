@@ -25,7 +25,7 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  def authenticate_admin
+  def authorize_admin!
     unless current_user&.admin?
       render json: { error: "Admin access required" }, status: :forbidden
     end
