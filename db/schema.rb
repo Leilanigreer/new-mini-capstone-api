@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2024_11_25_213802) do
+ActiveRecord::Schema[7.2].define(version: 2024_11_27_231546) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -64,6 +64,9 @@ ActiveRecord::Schema[7.2].define(version: 2024_11_25_213802) do
     t.datetime "updated_at", null: false
     t.integer "inventory"
     t.bigint "supplier_id"
+    t.string "status", default: "active"
+    t.boolean "is_seed_data", default: false
+    t.index ["status"], name: "index_products_on_status"
     t.index ["supplier_id"], name: "index_products_on_supplier_id"
   end
 
