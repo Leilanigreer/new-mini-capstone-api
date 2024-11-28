@@ -1,13 +1,22 @@
-# lib/tasks/products.rake
 namespace :products do
-  desc "Reset products to seed state and archive old products"
+  desc "Reset seed products and archive old products"
   task reset: :environment do
-    Product.reset_products
-  end
+    begin
+      puts "Starting product reset..."
 
-  desc "Create seed data backup"
-  task backup_seeds: :environment do
-    db_config = Rails.configuration.database_url || Rails.configuration.database_configuration[Rails.env]
-    system("pg_dump --data-only --table=products --table=images --table=category_products --where=\"products.is_seed_data = true\" #{db_config['database']} > #{Rails.root.join('db', 'seed_products.sql')}")
+      # Load and execute seed SQL file
+      seed_sql = File.read(Rails.root.join("db", "seed_products.sql"))
+      ActiveRecord::Base.connection.execute(seed_sql)
+
+      # Archive non-seed products older than 7 days
+      Product.where(is_seed_data: false)
+             .where("created_at < ?", 7.days.ago)
+             .update_all(status: "archived")
+
+      puts "Product reset completed!"
+    ensure
+      # Explicitly close connections to ensure clean exit
+      ActiveRecord::Base.connection_pool.disconnect!
+    end
   end
 end
