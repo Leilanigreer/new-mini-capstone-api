@@ -5,7 +5,7 @@ class ProductsController < ApplicationController
 
   # Public actions - no auth required
   def index
-    @products = Product.all
+    @products = Product.for_display
     render :index
   end
 
@@ -28,7 +28,6 @@ class ProductsController < ApplicationController
   def update
     if @product.update(product_params)
       if params[:image_urls].present?
-        # Option 1: Replace all existing images
         @product.images.destroy_all
         create_product_images
       end
@@ -39,8 +38,8 @@ class ProductsController < ApplicationController
   end
 
   def destroy
-    @product.destroy
-    render json: { message: "Product has been removed" }
+    @product.archived!  # Note: it's archived! not archive! to match the enum
+    render json: { message: "Product has been archived" }
   end
 
   private
