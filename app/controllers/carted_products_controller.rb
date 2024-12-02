@@ -12,6 +12,17 @@ class CartedProductsController < ApplicationController
 
   def create
     if current_user != nil
+      existing_carted_product = CartedProduct.find_by(
+        user_id: current_user.id,
+        product_id: params[:product_id],
+        status: "carted"
+      )
+
+      if existing_carted_product
+        render json: { errors: "This item is already in your cart" }, status: :unprocessable_entity
+        return
+      end
+
       @carted_product = CartedProduct.new(
         user_id: current_user.id,
         product_id: params[:product_id],
@@ -19,6 +30,7 @@ class CartedProductsController < ApplicationController
         status: "carted",
         order_id: nil
       )
+
       if @carted_product.save
         render :show
       else

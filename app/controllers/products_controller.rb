@@ -38,7 +38,7 @@ class ProductsController < ApplicationController
   end
 
   def destroy
-    @product.archived!  # Note: it's archived! not archive! to match the enum
+    @product.archived!
     render json: { message: "Product has been archived" }
   end
 
