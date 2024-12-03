@@ -8,7 +8,7 @@ class ApplicationController < ActionController::Base
       begin
         decoded_token = JWT.decode(
           token,
-          Rails.application.credentials.fetch(:secret_key_base),
+          secret_key,  # Using our new method here
           true,
           { algorithm: "HS256" }
         )
@@ -49,6 +49,14 @@ class ApplicationController < ActionController::Base
   end
 
   private
+
+  def secret_key
+    if Rails.env.test?
+      "a" * 30
+    else
+      Rails.application.credentials.fetch(:secret_key_base)
+    end
+  end
 
   def user_not_authorized
     render json: {
