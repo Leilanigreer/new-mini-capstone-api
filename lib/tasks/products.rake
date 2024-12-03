@@ -4,40 +4,40 @@ namespace :products do
     begin
       puts "Starting product reset..."
 
-      # Construct the internal database URL for Railway
-      # Using environment variables that Railway provides
-      db_config = {
-        user: ENV["PGUSER"],
-        password: ENV["POSTGRES_PASSWORD"],
-        host: ENV["RAILWAY_PRIVATE_DOMAIN"],
-        port: "5432",  # Railway's internal port is always 5432
-        database: ENV["PGDATABASE"]
-      }
+      # Get the database configuration from Rails
+      # This is more reliable as it uses the same configuration your app uses
+      db_config = ActiveRecord::Base.connection_config
 
-      # We'll add detailed logging to help with troubleshooting
+      puts "\nDatabase connection details (filtered):"
+      puts "Host: #{db_config[:host]}"
+      puts "Port: #{db_config[:port]}"
+      puts "Database: #{db_config[:database]}"
+      puts "Username: #{db_config[:username]}"
+      puts "Using password?: #{db_config[:password].present? ? 'Yes' : 'No'}"
+      puts "\n"
+
       puts "Connecting to database #{db_config[:database]} on host #{db_config[:host]}"
 
       # Set up the environment for psql
-      # We only need to set PGPASSWORD as other credentials will be passed via command line
       env = {
         "PGPASSWORD" => db_config[:password],
         "RAILS_ENV" => ENV["RAILS_ENV"] || "production"
       }
 
-      # Construct the psql command with careful attention to security and error handling
+      # Construct the psql command
       cmd = [
         "psql",
         "-h", db_config[:host],
-        "-p", db_config[:port],
-        "-U", db_config[:user],
+        "-p", db_config[:port].to_s,
+        "-U", db_config[:username],
         "-d", db_config[:database],
-        "-v", "ON_ERROR_STOP=1",     # Stop on first error
-        "-a",                        # Echo all input from the script
-        "-e",                        # Echo commands sent to server
+        "-v", "ON_ERROR_STOP=1",
+        "-a",  # Echo all input
+        "-e",  # Echo commands
         "-f", Rails.root.join("db", "seed_products.sql").to_s
       ].join(" ")
 
-      puts "Executing seed SQL file..."
+      puts "Executing command: #{cmd.gsub(db_config[:password], '[FILTERED]')}"  # Log command but hide password
       result = system(env, cmd)
 
       if result
@@ -51,24 +51,28 @@ namespace :products do
         puts "Archived #{archived_count} old products"
         puts "Product reset completed successfully!"
       else
-        # Capture detailed error information
         error_message = "Failed to execute SQL file. Exit status: #{$?.exitstatus}"
         puts error_message
+        puts "\nTrying to get more error information..."
 
-        # Try to get more detailed error information if possible
-        puts "Last few lines of psql output (if available):"
-        system("tail -n 5 #{Rails.root.join('log', 'production.log')}")
+        # Try to test database connection through Rails
+        begin
+          test_connection = ActiveRecord::Base.connection.execute("SELECT 1")
+          puts "Rails database connection test: SUCCESS"
+        rescue => e
+          puts "Rails database connection test: FAILED"
+          puts "Error: #{e.message}"
+        end
 
         raise error_message
       end
 
     rescue => e
       error_message = "Error during product reset: #{e.message}"
-      Rails.logger.error(error_message)
-      Rails.logger.error(e.backtrace.join("\n"))
+      puts error_message
+      puts e.backtrace
       raise e
     ensure
-      # Clean up database connections
       ActiveRecord::Base.connection_pool.disconnect!
     end
   end
