@@ -12,7 +12,7 @@ class Product < ApplicationRecord
   validates :price, numericality: { greater_than: 0 }
   validates :description, length: { in: 1..500 }
 
-  enum status: { active: "active", archived: "archived" }
+  enum :status, { active: "active", archived: "archived" }
 
   scope :active, -> { where(status: "active") }
   scope :for_display, -> { active.order(created_at: :desc) }

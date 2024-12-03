@@ -2,16 +2,14 @@
 
 one:
   user_id: 1
-  product_id: 1
-  quantity: 1
   subtotal: 9.99
   tax: 9.99
   total: 9.99
+  payment_method: "credit_card"
 
 two:
   user_id: 1
-  product_id: 1
-  quantity: 1
   subtotal: 9.99
   tax: 9.99
   total: 9.99
+  payment_method: "debit_card"

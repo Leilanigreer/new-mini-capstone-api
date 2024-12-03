@@ -3,8 +3,5 @@ class User < ApplicationRecord
   validates :email, presence: true, uniqueness: true
   has_many :orders
 
-  enum role: {
-    shopper: 0,
-    admin: 1
-  }
+  enum :role, { shopper: 0, admin: 1 }
 end

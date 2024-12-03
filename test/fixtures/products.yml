@@ -2,12 +2,18 @@
 
 one:
   name: MyString
-  price: 1
-  # image_url: MyString
+  price: 1.99
   description: MyString
+  inventory: 100
+  supplier_id: 1
+  status: active
+  is_seed_data: false
 
 two:
   name: MyString
-  price: 1
-  # image_url: MyString
+  price: 2.99
   description: MyString
+  inventory: 50
+  supplier_id: 1
+  status: active
+  is_seed_data: false

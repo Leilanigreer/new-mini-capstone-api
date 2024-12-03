@@ -38,7 +38,7 @@ class ProductsController < ApplicationController
   end
 
   def destroy
-    @product.archived!
+    @product.update_column(:status, "archived")
     render json: { message: "Product has been archived" }
   end
 
@@ -52,12 +52,21 @@ class ProductsController < ApplicationController
   end
 
   def product_params
-    {
-      name: params[:name] || @product&.name,
-      price: params[:price] || @product&.price,
-      description: params[:description] || @product&.description,
-      supplier_id: params[:supplier_id] || @product&.supplier_id
+    # Start with the current values as defaults
+    params_hash = {
+      name: @product&.name,
+      price: @product&.price,
+      description: @product&.description,
+      supplier_id: @product&.supplier_id
     }
+
+    # Update with any provided values, even if they're falsey
+    params_hash[:name] = params[:name] if params.key?(:name)
+    params_hash[:price] = params[:price] if params.key?(:price)
+    params_hash[:description] = params[:description] if params.key?(:description)
+    params_hash[:supplier_id] = params[:supplier_id] if params.key?(:supplier_id)
+
+    params_hash
   end
 
   def create_product_images
